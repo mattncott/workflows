@@ -1,0 +1,30 @@
+name: Release To Nuget
+
+on:
+  workflow_call:
+    inputs:
+      csproj-location:
+        required: true
+        type: string
+      working-directory:
+        type: string
+        default: .
+
+jobs:
+  release:
+    name: Release to Nuget
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ${{inputs.working-directory}}
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: publish on version change
+        id: publish_nuget
+        uses: alirezanet/publish-nuget@v3.1.0
+        with:
+          PROJECT_FILE_PATH: ${{ inputs.csproj-location }}
+          NUGET_KEY: ${{secrets.NUGET_TOKEN}}
+          

@@ -1,0 +1,44 @@
+name: 'Test .Net'
+
+on:
+  workflow_call:
+    inputs:
+        working-directory:
+            type: string
+            default: .
+
+jobs:
+  test-dotnet:
+    name: Test .Net Application
+    strategy:
+      matrix:
+        dotnet-version: [7.0.x, 8.0.x]
+
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ matrix.dotnet-version }}
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore
+    - name: Test
+      run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage;Format=lcov"
+    - name: "Check can upload to coverage"
+      env: 
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      if: ${{ env.CODECOV_TOKEN == '' }}
+      run: 'echo "echo skipping codecov upload due to CODECOV_TOKEN not being found in secrets."'
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
+      if: ${{ env.CODECOV_TOKEN != '' }}
+      env:
+        CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}

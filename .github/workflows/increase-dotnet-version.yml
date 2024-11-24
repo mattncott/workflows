@@ -1,0 +1,41 @@
+name: Increase .Net Version
+
+on:
+  workflow_call:
+    inputs:
+      csproj-location:
+        required: true
+        type: string
+    outputs:
+      version:
+        description: "The new CSPROJ version"
+        value: ${{ jobs.version.outputs.version }}
+
+jobs:
+  version:
+    name: Increase .Net Version
+    runs-on: ubuntu-latest
+    permissions:
+        contents: write
+    outputs:
+      version: ${{ steps.package_version.outputs.version }}
+
+    steps:
+        - name: Checkout
+          uses: actions/checkout@v3
+  
+        - name: Bump version
+          id: package_version
+          uses: KageKirin/bump-csproj-version@v0
+          with:
+            file: ${{ inputs.csproj-location }}
+            patch: true
+  
+        - name: Tag commit
+          uses: tvdias/github-tagger@v0.0.1
+          with:
+              repo-token: "${{ secrets.GITHUB_TOKEN }}"
+              tag: "v${{ steps.package_version.outputs.version }}"
+        
+        - name: Commit new version
+          uses: stefanzweifel/git-auto-commit-action@v5
