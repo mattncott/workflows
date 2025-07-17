@@ -6,6 +6,22 @@ on:
       csproj-location:
         required: true
         type: string
+      prerelease:
+        required: false
+        type: boolean
+        default: false
+      major:
+        required: false
+        type: boolean
+        default: false
+      minor:
+        required: false
+        type: boolean
+        default: false
+      patch:
+        required: false
+        type: boolean
+        default: false
     outputs:
       version:
         description: "The new CSPROJ version"
@@ -29,9 +45,13 @@ jobs:
           uses: KageKirin/bump-csproj-version@v0
           with:
             file: ${{ inputs.csproj-location }}
-            patch: true
+            major: ${{ inputs.major }}
+            minor: ${{ inputs.minor }}
+            patch: ${{ inputs.patch }}
+            prerelease: ${{ inputs.prerelease }}
   
         - name: Tag commit
+          if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
           uses: tvdias/github-tagger@v0.0.1
           with:
               repo-token: "${{ secrets.GITHUB_TOKEN }}"
