@@ -6,14 +6,13 @@ on:
         working-directory:
             type: string
             default: .
+        dotnet-version:
+            type: string
+            default: 8.0.x
 
 jobs:
   test-dotnet:
     name: Test .Net Application
-    strategy:
-      matrix:
-        dotnet-version: [7.0.x, 8.0.x]
-
     runs-on: ubuntu-latest
 
     defaults:
@@ -25,7 +24,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: ${{ matrix.dotnet-version }}
+        dotnet-version: ${{ inputs.dotnet-version }}
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
