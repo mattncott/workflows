@@ -9,6 +9,10 @@ on:
         dotnet-version:
             type: string
             default: 8.0.x
+        upload-coverage:
+            description: Should the generated coverage report be uploaded to codecov?
+            type: boolean
+            default: true
 
 jobs:
   test-dotnet:
@@ -38,6 +42,6 @@ jobs:
       run: 'echo "echo skipping codecov upload due to CODECOV_TOKEN not being found in secrets."'
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
-      if: ${{ env.CODECOV_TOKEN != '' }}
+      if: ${{ env.CODECOV_TOKEN != '' && inputs.upload-coverage }}
       env:
         CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
