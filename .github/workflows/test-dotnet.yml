@@ -1,47 +1,52 @@
-name: 'Test .Net'
+name: Test
 
 on:
   workflow_call:
     inputs:
         working-directory:
-            type: string
-            default: .
-        dotnet-version:
-            type: string
-            default: 8.0.x
+          type: string
+          default: .
         upload-coverage:
-            description: Should the generated coverage report be uploaded to codecov?
-            type: boolean
-            default: true
+          type: string
+          default: 'false'
+        nuget-source:
+          type: string
+          default: ''
 
 jobs:
   test-dotnet:
-    name: Test .Net Application
+    name: Test
+
     runs-on: ubuntu-latest
 
     defaults:
       run:
-        working-directory: ${{ inputs.working-directory }}
+          working-directory: ${{ inputs.working-directory }}
 
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: ${{ inputs.dotnet-version }}
+        dotnet-version: 8.0.x
+    - name: Ensure GitHub NuGet Source
+      if: ${{ inputs.nuget-source != '' }}
+      run: |
+        dotnet nuget add source ${NUGET_SOURCE} \
+        -n github \
+        -u ${{ secrets.NUGET_USER }} \
+        -p ${{ secrets.NUGET_TOKEN }} \
+        --store-password-in-clear-text
+      env:
+        NUGET_SOURCE: ${{ inputs.nuget-source }}
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage;Format=lcov"
-    - name: "Check can upload to coverage"
-      env: 
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-      if: ${{ env.CODECOV_TOKEN == '' }}
-      run: 'echo "echo skipping codecov upload due to CODECOV_TOKEN not being found in secrets."'
     - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v3
-      if: ${{ env.CODECOV_TOKEN != '' && inputs.upload-coverage }}
+      if: ${{ inputs.upload-coverage == 'true' }}
+      uses: codecov/codecov-action@v5
       env:
         CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
