@@ -3,28 +3,38 @@ name: Release To Nuget
 on:
   workflow_call:
     inputs:
-      csproj-location:
-        required: true
-        type: string
-      working-directory:
-        type: string
-        default: .
+        nuget-source:
+            type: string
+            default: https://api.nuget.org
+        working-directory:
+            type: string
+            default: .
+        version:
+            type: string
+            required: true
 
 jobs:
-  release:
-    name: Release to Nuget
+  build-nuget:
     runs-on: ubuntu-latest
-
     defaults:
-      run:
-        working-directory: ${{inputs.working-directory}}
-
+        run:
+            working-directory: ${{ inputs.working-directory }}
     steps:
-      - uses: actions/checkout@v3
-      - name: publish on version change
-        id: publish_nuget
-        uses: alirezanet/publish-nuget@v3.1.0
-        with:
-          PROJECT_FILE_PATH: ${{ inputs.csproj-location }}
-          NUGET_KEY: ${{secrets.NUGET_TOKEN}}
-          
+        - uses: actions/checkout@v3
+        - name: Setup .NET
+          uses: actions/setup-dotnet@v3
+          with:
+            dotnet-version: 8.0.x
+        - name: Restore dependencies
+          run: dotnet restore
+        - name: Build
+          run: dotnet build --no-restore
+        - name: Pack
+          run: dotnet pack --configuration Release /p:Version=${VERSION} --output .
+          env:
+            VERSION: ${{ inputs.version }}
+        - name: Push
+          run: dotnet nuget push *.nupkg --source ${NUGET_SOURCE} --api-key ${NUGET_TOKEN}
+          env:
+            NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+            NUGET_SOURCE: ${{ inputs.nuget-source }}
