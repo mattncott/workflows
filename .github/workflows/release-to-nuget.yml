@@ -34,7 +34,7 @@ jobs:
           env:
             VERSION: ${{ inputs.version }}
         - name: Push
-          run: dotnet nuget push *.nupkg --source ${NUGET_SOURCE} --api-key ${NUGET_TOKEN}
+          run: dotnet nuget push *.nupkg --source ${NUGET_SOURCE} --api-key ${NUGET_TOKEN} --skip-duplicate
           env:
             NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
             NUGET_SOURCE: ${{ inputs.nuget-source }}
