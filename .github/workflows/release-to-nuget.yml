@@ -54,4 +54,3 @@ jobs:
           run: dotnet nuget push *.nupkg --api-key ${NUGET_TOKEN} --skip-duplicate
           env:
             NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
-            NUGET_SOURCE: ${{ inputs.nuget-source }}
