@@ -1,0 +1,35 @@
+name: Increase Version
+
+on:
+  workflow_call:
+    inputs:
+        working-directory:
+            type: string
+            default: .
+    outputs:
+      version:
+        description: The new version
+        value: ${{ jobs.increase-version.outputs.version }}
+
+jobs:
+  increase-version:
+    permissions: write-all
+    name: Increase Version
+    outputs:
+      version: ${{ steps.bump.outputs.new_version }}
+
+    runs-on: ubuntu-latest
+
+    defaults:
+        run:
+            working-directory: ${{ inputs.working-directory }}
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: mathieudutour/github-tag-action@v6.2
+      id: bump
+      name: Bump version and push tag
+      with:
+        default_bump: prerelease
+        append_to_pre_release_tag: prerelease
+        github_token: ${{ secrets.GITHUB_TOKEN }}
