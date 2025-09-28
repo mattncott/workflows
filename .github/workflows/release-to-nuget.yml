@@ -26,7 +26,7 @@ jobs:
           with:
             dotnet-version: 8.0.x
         - name: Ensure GitHub NuGet Source
-          if: ${{ inputs.nuget-source != 'https://api.nuget.org' }}
+          if: ${{ inputs.nuget-source != 'https://api.nuget.org/v3/index.json' }}
           run: |
             dotnet nuget add source ${NUGET_SOURCE} \
             -n github \
