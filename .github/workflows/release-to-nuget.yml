@@ -5,7 +5,7 @@ on:
     inputs:
         nuget-source:
             type: string
-            default: https://api.nuget.org
+            default: https://api.nuget.org/v3/index.json
         working-directory:
             type: string
             default: .
@@ -43,14 +43,8 @@ jobs:
           run: dotnet pack --configuration Release /p:Version=${VERSION} --output .
           env:
             VERSION: ${{ inputs.version }}
-        - name: Push to custom source
-          if: ${{ inputs.nuget-source != 'https://api.nuget.org' }}
+        - name: Push
           run: dotnet nuget push *.nupkg --source ${NUGET_SOURCE} --api-key ${NUGET_TOKEN} --skip-duplicate
           env:
             NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
             NUGET_SOURCE: ${{ inputs.nuget-source }}
-        - name: Push to Nuget
-          if: ${{ inputs.nuget-source == 'https://api.nuget.org' }}
-          run: dotnet nuget push *.nupkg --api-key ${NUGET_TOKEN} --skip-duplicate
-          env:
-            NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
