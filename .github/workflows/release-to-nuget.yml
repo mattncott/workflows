@@ -12,6 +12,9 @@ on:
         version:
             type: string
             required: true
+        solution-path:
+          type: string
+          default: ''
 
 jobs:
   build-nuget:
@@ -36,11 +39,11 @@ jobs:
           env:
             NUGET_SOURCE: ${{ inputs.nuget-source }}
         - name: Restore dependencies
-          run: dotnet restore
+          run: dotnet restore ${{ inputs.solution-path }}
         - name: Build
-          run: dotnet build --no-restore
+          run: dotnet build --no-restore ${{ inputs.solution-path }}
         - name: Pack
-          run: dotnet pack --configuration Release /p:Version=${VERSION} --output .
+          run: dotnet pack --configuration Release /p:Version=${VERSION} --output . ${{ inputs.solution-path }}
           env:
             VERSION: ${{ inputs.version }}
         - name: Push
